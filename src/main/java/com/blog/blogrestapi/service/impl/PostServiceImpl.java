@@ -6,6 +6,7 @@ import com.blog.blogrestapi.entity.Post;
 import com.blog.blogrestapi.exception.ResourceNotFoundException;
 import com.blog.blogrestapi.repository.PostRepository;
 import com.blog.blogrestapi.service.PostService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public PostDto createPost(PostDto postDto) {
@@ -89,22 +93,31 @@ public class PostServiceImpl implements PostService {
     }
 
     private PostDto mapToDto(Post post){
-        // convert entity to DTO
-        PostDto postDtoResponse = new PostDto();
+        // conversion using model mapper
+        PostDto postDtoResponse = modelMapper.map(post,PostDto.class);  // map(source[converted from], destination[converted into])
+
+        /** Manual conversion
+         * */
+    /*   PostDto postDtoResponse = new PostDto();
         postDtoResponse.setId(post.getId());
         postDtoResponse.setContent(post.getContent());
         postDtoResponse.setDescription(post.getDescription());
-        postDtoResponse.setTitle(post.getTitle());
+        postDtoResponse.setTitle(post.getTitle());*/
 
         return  postDtoResponse;
     }
 
     private Post mapToEntity(PostDto postDto){
+        // conversion using model mapper
+        Post post  = modelMapper.map(postDto,Post.class);  // map(source[converted from], destination[converted into])
 
-        Post post = new Post();
+        /** Manual conversion
+         * */
+
+       /* Post post = new Post();
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
-        post.setDescription(postDto.getDescription());
+        post.setDescription(postDto.getDescription());*/
 
         return  post;
     }

@@ -8,6 +8,7 @@ import com.blog.blogrestapi.exception.ResourceNotFoundException;
 import com.blog.blogrestapi.repository.CommentRepository;
 import com.blog.blogrestapi.repository.PostRepository;
 import com.blog.blogrestapi.service.CommentService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,9 @@ public class CommentServiceImp implements CommentService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public CommentDto createComment(long postId, CommentDto commentDto) {
@@ -88,23 +92,44 @@ public class CommentServiceImp implements CommentService {
         return mapToDto(updatedComment);
     }
 
+    @Override
+    public void deleteComment(long postId, long commentId) {
+        // retrieve post id
+        Post post = postRepository.findById(postId).orElseThrow(()-> new ResourceNotFoundException("Post","id",postId));
+
+        // retrieve comment by id
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new ResourceNotFoundException("Comment","id",commentId));
+
+        if(comment.getPost().getId() != post.getId()){
+            throw new BlogApiException(HttpStatus.BAD_REQUEST,"Comment does not to the post");
+        }
+
+        commentRepository.delete(comment);
+    }
+
     private CommentDto mapToDto(Comment comment){
-        CommentDto commentDto = new CommentDto();
+
+        CommentDto commentDto = modelMapper.map(comment,CommentDto.class);
+
+     /*   CommentDto commentDto = new CommentDto();
         commentDto.setBody(comment.getBody());
         commentDto.setId(comment.getId());
         commentDto.setEmail(comment.getEmail());
-        commentDto.setName(comment.getName());
+        commentDto.setName(comment.getName());*/
 
         return commentDto;
     }
 
     private Comment mapToEntity(CommentDto commentDto){
-        Comment comment = new Comment();
+
+        Comment comment = modelMapper.map(commentDto,Comment.class);
+
+      /*  Comment comment = new Comment();
         comment.setBody(commentDto.getBody());
         comment.setId(commentDto.getId());
         comment.setEmail(commentDto.getEmail());
         comment.setName(commentDto.getName());
-
+*/
         return comment;
     }
 }
